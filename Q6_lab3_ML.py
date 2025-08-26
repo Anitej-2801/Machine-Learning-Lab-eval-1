@@ -5,29 +5,28 @@ from sklearn.neighbors import KNeighborsClassifier
 
 # ---------- Functions ----------
 def split_dataset(X, y, test_ratio=0.3, random_state=42):
-    """Split dataset into train and test sets."""
     return train_test_split(X, y, test_size=test_ratio, random_state=random_state)
 
 def train_knn(X_train, y_train, k=3):
-    """Train a kNN classifier."""
     model = KNeighborsClassifier(n_neighbors=k)
     model.fit(X_train, y_train)
     return model
 
 def evaluate_accuracy(model, X_test, y_test):
-    """Evaluate model accuracy on the test set."""
     return model.score(X_test, y_test)
 
 
 # ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # Load dataset (.xlsx file)
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
+    df = pd.read_excel(file_path)
 
-    # Separate features (X) and labels (y)
-    X = df.iloc[:, :-1].values   # all columns except last
-    y = df.iloc[:, -1].values    # last column = class labels
+    # Keep only numeric columns for features
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values  # exclude last column
+
+    # Convert last column (labels) to categorical codes
+    y = df.iloc[:, -1].astype("category").cat.codes.values
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test = split_dataset(X, y, test_ratio=0.3)
@@ -39,4 +38,5 @@ if __name__ == "__main__":
     accuracy = evaluate_accuracy(knn_model, X_test, y_test)
 
     # Print results
-    print(f"Accuracy of kNN (k=3) on test set: {accuracy:.4f}")
+    print(f"✅ Accuracy of kNN (k=3) on test set: {accuracy:.4f}")
+    print("Unique class labels encoded as:", np.unique(y))
