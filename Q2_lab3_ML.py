@@ -1,41 +1,52 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import os
 
-# ---------- Functions ----------
-def calculate_mean_variance(feature_data):
-    """Return mean and variance of a feature column."""
-    mean_val = np.mean(feature_data)
-    var_val = np.var(feature_data)
-    return mean_val, var_val
+def calculate_centroid(data):
+    return np.mean(data, axis=0)
 
-def plot_histogram(feature_data, feature_name):
-    """Plot histogram for a given feature."""
-    plt.hist(feature_data, bins=10, edgecolor="black", alpha=0.7)
-    plt.title(f"Histogram of {feature_name}")
-    plt.xlabel(feature_name)
-    plt.ylabel("Frequency")
-    plt.grid(True, linestyle="--", alpha=0.6)
-    plt.show()
+def calculate_spread(data):
+    return np.std(data, axis=0)
 
+def calculate_distance(c1, c2):
+    return np.linalg.norm(c1 - c2)
 
-# ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # ✅ Use your dataset (CSV or XLSX)
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
+    
+    # ✅ Auto-detect file type
+    ext = os.path.splitext(file_path)[-1].lower()
+    if ext == ".csv":
+        df = pd.read_csv(file_path)
+    elif ext in [".xlsx", ".xls"]:
+        df = pd.read_excel(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
+    
+    # ✅ Keep only numeric columns for features
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values  # numeric features
+    y = df.iloc[:, -1].values  # last column as labels (even if categorical)
+    
+    # ✅ Pick first 2 classes
+    class_labels = np.unique(y)[:2]
+    class1_data = X[y == class_labels[0]]
+    class2_data = X[y == class_labels[1]]
 
-    # Pick a feature (example: first column)
-    feature_name = df.columns[0]
-    feature_data = df[feature_name].values
+    # ✅ Compute centroids, spreads, and distance
+    centroid1 = calculate_centroid(class1_data)
+    centroid2 = calculate_centroid(class2_data)
+    spread1 = calculate_spread(class1_data)
+    spread2 = calculate_spread(class2_data)
+    interclass_dist = calculate_distance(centroid1, centroid2)
 
-    # Calculate mean & variance
-    mean_val, var_val = calculate_mean_variance(feature_data)
-
-    # Print results
-    print(f"Feature Selected: {feature_name}")
-    print(f"Mean: {mean_val}")
-    print(f"Variance: {var_val}\n")
-
-    # Plot histogram
-    plot_histogram(feature_data, feature_name)
+    # ✅ Print results
+    print("✅ Dataset loaded successfully")
+    print("Shape:", df.shape)
+    print("Numeric features used:", df.select_dtypes(include=[np.number]).columns.tolist())
+    print("\n--- Results for A1 ---")
+    print(f"Centroid (Class {class_labels[0]}): {centroid1}")
+    print(f"Spread (Class {class_labels[0]}): {spread1}")
+    print(f"Centroid (Class {class_labels[1]}): {centroid2}")
+    print(f"Spread (Class {class_labels[1]}): {spread2}")
+    print(f"Interclass Distance: {interclass_dist:.4f}")
