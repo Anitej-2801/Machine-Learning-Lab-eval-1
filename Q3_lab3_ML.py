@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 # ---------- Functions ----------
 def minkowski_distance(x, y, r):
@@ -27,12 +28,22 @@ def plot_distances(r_range, distances, vec1_id, vec2_id):
 
 # ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # ✅ Use your dataset (CSV or XLSX)
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
 
-    # Assuming last column is class label, so we take only feature columns
-    X = df.iloc[:, :-1].values
+    # ✅ Auto-detect file type
+    ext = os.path.splitext(file_path)[-1].lower()
+    if ext == ".csv":
+        df = pd.read_csv(file_path)
+    elif ext in [".xlsx", ".xls"]:
+        df = pd.read_excel(file_path)
+    elif ext == ".ods":
+        df = pd.read_excel(file_path, engine="odf")
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
+
+    # ✅ Keep only numeric columns for feature vectors
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values
 
     # -------------------------------
     # Choose two feature vectors (rows) from the dataset
