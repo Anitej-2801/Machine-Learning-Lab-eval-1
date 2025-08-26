@@ -27,13 +27,15 @@ def make_predictions(model, X_test):
 
 # ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # Load schizophrenia dataset (.xlsx)
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
+    df = pd.read_excel(file_path)
 
-    # Separate features (X) and labels (y)
-    X = df.iloc[:, :-1].values   # all columns except last
-    y = df.iloc[:, -1].values    # last column = class labels
+    # Keep only numeric columns for features
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values
+
+    # Convert last column (labels) to categorical codes
+    y = df.iloc[:, -1].astype("category").cat.codes.values
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test = split_dataset(X, y, test_ratio=0.3)
@@ -43,14 +45,14 @@ if __name__ == "__main__":
 
     # Evaluate accuracy
     accuracy = evaluate_accuracy(knn_model, X_test, y_test)
-    print(f"Accuracy of kNN (k=3) on test set: {accuracy:.4f}\n")
+    print(f"✅ Accuracy of kNN (k=3) on test set: {accuracy:.4f}\n")
 
     # Predictions
     y_pred_all, y_pred_single = make_predictions(knn_model, X_test)
 
     # Print results
-    print("Predictions for all test vectors:")
-    print(y_pred_all[:10])  # show first 10 predictions for brevity
+    print("Predictions for first 10 test vectors:")
+    print(y_pred_all[:10])
 
     print("\nActual labels for first 10 test vectors:")
     print(y_test[:10])
