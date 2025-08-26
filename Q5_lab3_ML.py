@@ -13,7 +13,7 @@ def train_knn(X_train, y_train, k=3):
     Train a kNN classifier.
     Args:
         X_train (numpy.ndarray): Training features
-        y_train (numpy.ndarray): Training labels
+        y_train (numpy.ndarray): Training labels (categorical)
         k (int): Number of neighbors
     Returns:
         KNeighborsClassifier: Trained kNN model
@@ -25,13 +25,15 @@ def train_knn(X_train, y_train, k=3):
 
 # ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # ✅ Use schizophrenia dataset
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
+    df = pd.read_excel(file_path)
 
-    # Separate features (X) and labels (y)
-    X = df.iloc[:, :-1].values   # all columns except last
-    y = df.iloc[:, -1].values    # last column = class labels
+    # ✅ Keep numeric columns for features
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values
+
+    # ✅ Convert last column (labels) into categorical codes
+    y = df.iloc[:, -1].astype("category").cat.codes.values
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test = split_dataset(X, y, test_ratio=0.3)
@@ -40,4 +42,6 @@ if __name__ == "__main__":
     knn_model = train_knn(X_train, y_train, k=3)
 
     # Print confirmation
-    print("kNN model trained successfully with k=3")
+    print("✅ kNN model trained successfully with k=3")
+    print("Unique classes in labels:", np.unique(y))
+
