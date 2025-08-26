@@ -6,21 +6,17 @@ from sklearn.neighbors import KNeighborsClassifier
 
 # ---------- Functions ----------
 def split_dataset(X, y, test_ratio=0.3, random_state=42):
-    """Split dataset into train and test sets."""
     return train_test_split(X, y, test_size=test_ratio, random_state=random_state)
 
 def train_knn(X_train, y_train, k):
-    """Train a kNN classifier with given k."""
     model = KNeighborsClassifier(n_neighbors=k)
     model.fit(X_train, y_train)
     return model
 
 def evaluate_accuracy(model, X_test, y_test):
-    """Evaluate model accuracy on the test set."""
     return model.score(X_test, y_test)
 
 def compare_k_values(X_train, X_test, y_train, y_test, k_range=range(1, 12)):
-    """Train kNN for k in k_range and return list of accuracies."""
     accuracies = []
     for k in k_range:
         model = train_knn(X_train, y_train, k)
@@ -29,7 +25,6 @@ def compare_k_values(X_train, X_test, y_train, y_test, k_range=range(1, 12)):
     return accuracies
 
 def plot_accuracy(k_range, accuracies):
-    """Plot accuracy vs k."""
     plt.plot(k_range, accuracies, marker="o", linestyle="-")
     plt.title("kNN Accuracy vs k")
     plt.xlabel("k (Number of Neighbors)")
@@ -40,13 +35,15 @@ def plot_accuracy(k_range, accuracies):
 
 # ---------- Main Program ----------
 if __name__ == "__main__":
-    # Load dataset (.ods file)
-    file_path = r"C:\Users\anite\Downloads\proj_dataset (1) (2).ods"
-    df = pd.read_excel(file_path, engine="odf")
+    # Load schizophrenia dataset
+    file_path = r"C:\Users\anite\Downloads\schizophrenia-features.csv.xlsx"
+    df = pd.read_excel(file_path)
 
-    # Separate features (X) and labels (y)
-    X = df.iloc[:, :-1].values   # features
-    y = df.iloc[:, -1].values    # labels
+    # Keep only numeric features
+    X = df.select_dtypes(include=[np.number]).iloc[:, :-1].values
+
+    # Convert labels to categorical codes
+    y = df.iloc[:, -1].astype("category").cat.codes.values
 
     # Split dataset
     X_train, X_test, y_train, y_test = split_dataset(X, y, test_ratio=0.3)
